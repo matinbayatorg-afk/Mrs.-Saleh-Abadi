@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>هدیهٔ ویژه</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-1: #030312;
+    --bg-2: #071427;
+    --glass: rgba(255,255,255,0.03);
+    --accent-a: #ff6b9a;
+    --accent-b: #ffd7ea;
+    --size: min(860px, 96vw);
+    --gap: 10px;
+    --tile-radius: 14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;padding:0;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial;direction:rtl}
+  body{display:flex;align-items:center;justify-content:center;padding:28px;color:#fff}
+
+  /* container */
+  .wrap{
+    width:var(--size);
+    max-width:1000px;
+    border-radius:20px;
+    position:relative;
+    padding:22px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
+    box-shadow: 0 30px 90px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    overflow:visible;
+  }
+
+  /* flashy header (only the exact phrase is allowed here) */
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:14px;
+  }
+  .title{
+    font-family:"Playfair Display", serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:0.4px;
+    color: linear-gradient(90deg,#fff,#ffd7ea);
+    text-shadow:
+      0 6px 30px rgba(0,0,0,0.6),
+      0 1px 0 rgba(255,255,255,0.02);
+    padding:6px 18px;
+    border-radius:999px;
+    backdrop-filter: blur(6px) saturate(1.05);
+  }
+  /* the title text must be exactly this (no extra words) */
+  .title span{ display:inline-block; transform:translateY(-1px); }
+
+  /* cinematic stage */
+  .stage{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    flex-direction:column;
+  }
+
+  /* grid wrapper will become circular and contain rotating content */
+  .grid-wrap{
+    width:calc(var(--size) - 160px);
+    max-width:720px;
+    aspect-ratio:1/1;
+    border-radius:18px;
+    transition: all .7s cubic-bezier(.2,.9,.3,1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  /* when diskMode enabled, grid-wrap becomes perfect circle and hides overflow */
+  .grid-wrap.disk{
+    border-radius:9999px;
+    overflow:hidden;
+    box-shadow: 0 40px 110px rgba(0,0,0,0.6), inset 0 -6px 40px rgba(255,120,170,0.02);
+    transform:translateZ(0);
+  }
+
+  /* the grid itself */
+  .grid{
+    width:95%;
+    height:95%;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:var(--gap);
+    border-radius:12px;
+    transform-origin:center center;
+    transition: transform .35s ease;
+    direction:ltr; /* ensure LTR visual control */
+  }
+
+  .cell{
+    border-radius:var(--tile-radius);
+    overflow:hidden;
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.28));
+    border:1px solid rgba(255,255,255,0.03);
+    position:relative;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+
+  .cell img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    opacity:0;
+    transform: translateY(22px) scale(1.06);
+    transition: transform .8s cubic-bezier(.2,.9,.3,1), opacity .6s ease, filter .6s;
+    filter: saturate(.98) contrast(.98) brightness(.98);
+    will-change:transform,opacity,filter;
+  }
+
+  .cell img.visible{
+    opacity:1;
+    transform:none;
+    filter: saturate(1.06) contrast(1.04) brightness(1.02);
+  }
+
+  /* glow rings layered above grid when spinning */
+  .ring-layer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    display:block;
+    z-index:6;
+    mix-blend-mode:screen;
+    opacity:0.95;
+  }
+
+  /* control bar (only emoji buttons + small icons, no extra text) */
+  .controls{
+    margin-top:16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
+  }
+  .control-btn{
+    width:64px;
+    height:64px;
+    border-radius:999px;
+    border:0;
+    background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    cursor:pointer;
+    box-shadow: 0 18px 50px rgba(255,107,154,0.12);
+    transition: transform .18s ease;
+  }
+  .control-btn:active{ transform: scale(.96) }
+
+  /* small code toggle button (emoji) */
+  .code-toggle{
+    width:56px; height:56px; border-radius:12px;
+    background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04);
+    display:inline-flex;align-items:center;justify-content:center;font-size:20px; cursor:pointer;
+  }
+
+  /* code area - must contain only the exact lines user provided + final sentence (no extra labels) */
+  .code-area{
+    margin-top:14px;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(4,4,8,0.15));
+    padding:12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    font-size:13px;
+    color:#ffdfe9;
+    line-height:1.6;
+    white-space:pre-wrap;
+    display:none;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  /* subtle footer - only decorative emoji allowed (we'll avoid text) */
+  .footer{
+    margin-top:12px;
+    text-align:center;
+    color:rgba(255,255,255,0.08);
+    font-size:12px;
+  }
+
+  /* cinematic depth: blur background shapes */
+  .bg-shape{
+    position:absolute;
+    width:420px;
+    height:420px;
+    border-radius:50%;
+    filter: blur(80px);
+    opacity:0.25;
+    z-index:1;
+    pointer-events:none;
+  }
+  .bg-shape.a{ background: radial-gradient(circle at 30% 30%, rgba(255,120,170,0.15), transparent 20%); left:-120px; top:-120px;}
+  .bg-shape.b{ background: radial-gradient(circle at 70% 70%, rgba(110,190,255,0.09), transparent 18%); right:-140px; bottom:-140px;}
+
+  /* responsiveness */
+  @media (max-width:820px){
+    .wrap{padding:16px}
+    .control-btn{width:56px;height:56px;font-size:20px}
+  }
+  @media (max-width:480px){
+    .grid-wrap{width:88vw;height:88vw}
+    .grid{width:86vw;height:86vw}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-label="هدیه">
+    <div class="header">
+      <div class="title"><span>روزت مبارک قشنگترین دختر زندگی من🥹♥️</span></div>
+    </div>
+
+    <div class="stage">
+      <div class="bg-shape a"></div>
+      <div class="bg-shape b"></div>
+
+      <div class="grid-wrap" id="gridWrap">
+        <div class="grid" id="grid">
+          <!-- initial DOM order 1..9 (we will mirror left-right by JS, preserving center column) -->
+          <div class="cell" data-id="1"><img src="img1.jpg" alt=""></div>
+          <div class="cell" data-id="2"><img src="img2.jpg" alt=""></div>
+          <div class="cell" data-id="3"><img src="img3.jpg" alt=""></div>
+
+          <div class="cell" data-id="4"><img src="img4.jpg" alt=""></div>
+          <div class="cell" data-id="5"><img src="img5.jpg" alt=""></div>
+          <div class="cell" data-id="6"><img src="img6.jpg" alt=""></div>
+
+          <div class="cell" data-id="7"><img src="img7.jpg" alt=""></div>
+          <div class="cell" data-id="8"><img src="img8.jpg" alt=""></div>
+          <div class="cell" data-id="9"><img src="img9.jpg" alt=""></div>
+        </div>
+
+        <!-- layered bloom / rings canvas -->
+        <svg class="ring-layer" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <radialGradient id="rg1" cx="30%" cy="20%" r="60%">
+              <stop offset="0%" stop-color="#ffd7ea" stop-opacity="0.24"/>
+              <stop offset="40%" stop-color="#ffd7ea" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#ffd7ea" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="rg2" cx="70%" cy="80%" r="50%">
+              <stop offset="0%" stop-color="#9ed1ff" stop-opacity="0.14"/>
+              <stop offset="50%" stop-color="#9ed1ff" stop-opacity="0.02"/>
+              <stop offset="100%" stop-color="#9ed1ff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect x="0" y="0" width="100" height="100" fill="url(#rg1)"></rect>
+          <rect x="0" y="0" width="100" height="100" fill="url(#rg2)"></rect>
+        </svg>
+      </div>
+
+      <div class="controls" role="toolbar" aria-label="کنترل‌ها">
+        <button id="playBtn" class="control-btn" title="play">▶️</button>
+        <button id="pauseBtn" class="control-btn" title="pause">⏸️</button>
+        <button id="codeBtn" class="code-toggle" title="codes">🔐</button>
+      </div>
+
+      <div id="codeArea" class="code-area" aria-hidden="true">
+11011000 10101010
+11011001 10001000
+11011001 10000101
+11011000 10101011
+11011001 10000100
+11011001 10010000
+11011001 10000110
+11011001 10001000
+11011000 10110001
+11011001 10000111
+11011000 10110011
+11011000 10101010
+11011011 10001100
+1
+7777
+44
+444
+66
+33
+666
+66
+1
+22
+777
+2
+888
+33
+44
+33
+2
+777
+8
+11011000 10101010
+11011001 10001000
+11011001 10000101
+11011000 10101011
+11011001 10000100
+11011001 10010000
+11011001 10000110
+11011001 10001000
+11011000 10110001
+11011001 10000111
+11011000 10110011
+11011000 10101010
+11011011 10001100
+1
+7777
+44
+444
+66
+33
+666
+66
+1
+22
+777
+2
+888
+33
+44
+33
+2
+777
+8
+
+تو مثل نور هستی، shine on, brave heart.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- hidden audio element -->
+  <audio id="audio" preload="auto" crossorigin="anonymous">
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+<script>
+/*
+  Behavior summary (implements exactly what requested):
+  - mirror left/right columns while keeping center column in place
+  - super-cinematic visuals: particles, bloom, parallax
+  - two emoji controls (play/pause) + code toggle (🔐) - no extra text
+  - when play: images reveal, grid-wrap becomes circular and spins; only images rotate
+  - when pause: audio pauses but keeps currentTime; rotation pauses but preserves angle (no jump back)
+  - resume continues from same time & rotation angle
+  - code area contains ONLY the exact lines provided (no extra labels)
+*/
+
+/* -------- helpers & initial setup -------- */
+const grid = document.getElementById('grid');
+const gridWrap = document.getElementById('gridWrap');
+const cells = Array.from(grid.children);
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const codeBtn = document.getElementById('codeBtn');
+const codeArea = document.getElementById('codeArea');
+const audio = document.getElementById('audio');
+
+let animating = false;
+let revealed = false;
+
+/* ---------- mirror left/right columns while preserving center ---------- */
+(function mirrorColumns(){
+  // current DOM order: 1,2,3 / 4,5,6 / 7,8,9 (cells[0]..cells[8])
+  // desired visual: swap left<->right while keeping center same: 3,2,1 / 6,5,4 / 9,8,7
+  const order = [2,1,0,5,4,3,8,7,6];
+  const frag = document.createDocumentFragment();
+  order.forEach(i => frag.appendChild(cells[i]));
+  grid.appendChild(frag);
+})();
+
+/* ---------- preload images and reveal helper ---------- */
+const imgs = Array.from(document.querySelectorAll('.cell img'));
+imgs.forEach(img=>{
+  if (img.complete) img.classList.add('visible');
+  else img.addEventListener('load', ()=> img.classList.add('visible'));
+});
+
+function revealImagesStagger(){
+  if (revealed) return;
+  revealed = true;
+  const arr = Array.from(document.querySelectorAll('.cell img'));
+  arr.forEach((img, idx)=>{
+    setTimeout(()=> img.classList.add('visible'), idx * 90);
+  });
+}
+
+/* ---------- spinning logic (preserve angle on pause/resume) ---------- */
+let currentAngle = 0; // degrees
+let lastTimestamp = null;
+let running = false;
+let spinSpeed = 24; // degrees per second (can be adjusted)
+
+function tick(ts){
+  if (!lastTimestamp) lastTimestamp = ts;
+  const dt = (ts - lastTimestamp) / 1000; // seconds
+  lastTimestamp = ts;
+  if (running){
+    currentAngle = (currentAngle + spinSpeed * dt) % 360;
+    grid.style.transform = `rotate(${currentAngle}deg)`;
+  }
+  // subtle slow floating transform for glassiness
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* start spin: convert wrap to disk and start animation loop */
+function startVisualSpin(){
+  gridWrap.classList.add('disk');
+  // visually only rotate grid (cells inside). We already use transform on grid.
+  running = true;
+}
+
+/* stop spin: pause but preserve currentAngle */
+function pauseVisualSpin(){
+  running = false;
+}
+
+/* ---------- audio control: play / pause preserving time ---------- */
+async function tryPlayAudio(){
+  try{
+    // resume audio context if needed (for some browsers)
+    if (typeof AudioContext !== 'undefined' && window.audioCtx && window.audioCtx.state === 'suspended'){
+      window.audioCtx.resume().catch(()=>{});
+    }
+    await audio.play();
+    return true;
+  }catch(e){
+    // blocked by browser autoplay policies - fallback: show native controls for manual start
+    audio.controls = true;
+    audio.style.display = 'block';
+    return false;
+  }
+}
+
+/* resume from pause: keep audio.currentTime */
+async function handlePlay(){
+  revealImagesStagger();
+  const ok = await tryPlayAudio();
+  startVisualSpin();
+  // optionally init audio visualizer if available
+  if (ok) initVisualizer();
+}
+
+/* pause: stop audio but do not reset currentTime */
+function handlePause(){
+  audio.pause();
+  pauseVisualSpin();
+}
+
+/* ---------- code toggle (only show/hide exact supplied lines) ---------- */
+codeBtn.addEventListener('click', ()=>{
+  if (codeArea.style.display === 'block'){
+    codeArea.style.display = 'none';
+    codeArea.setAttribute('aria-hidden','true');
+  } else {
+    codeArea.style.display = 'block';
+    codeArea.setAttribute('aria-hidden','false');
+  }
+});
+
+/* connect play/pause UI */
+playBtn.addEventListener('click', ()=> {
+  // if audio is paused or ended, attempt play/resume
+  if (audio.paused || audio.ended){
+    handlePlay();
+  } else {
+    // if already playing, do nothing (user expected pause button)
+    // but optionally restart if desired - we keep semantics simple
+    // nothing
+  }
+});
+pauseBtn.addEventListener('click', ()=> {
+  if (!audio.paused){
+    handlePause();
+  } else {
+    // if paused, resume from same time
+    handlePlay();
+  }
+});
+
+/* ensure resume continues spinning when audio resumes via native controls */
+audio.addEventListener('play', ()=> {
+  startVisualSpin();
+});
+audio.addEventListener('pause', ()=> {
+  pauseVisualSpin();
+});
+audio.addEventListener('ended', ()=> {
+  pauseVisualSpin();
+  // keep disk shape (gridWrap.disk) and final angle preserved
+});
+
+/* ---------- small cinematic extras: particle canvas (soft) ---------- */
+const canvas = document.createElement('canvas');
+canvas.style.position = 'absolute';
+canvas.style.inset = '0';
+canvas.style.pointerEvents = 'none';
+canvas.style.zIndex = 3;
+gridWrap.appendChild(canvas);
+const ctx = canvas.getContext('2d');
+let W = canvas.width = canvas.clientWidth || canvas.offsetWidth;
+let H = canvas.height = canvas.clientHeight || canvas.offsetHeight;
+window.addEventListener('resize', ()=> {
+  W = canvas.width = canvas.clientWidth;
+  H = canvas.height = canvas.clientHeight;
+});
+
+const parts = [];
+for (let i=0;i<36;i++){
+  parts.push({
+    x: Math.random()*W,
+    y: Math.random()*H,
+    vx: (Math.random()-0.5)*0.2,
+    vy: (Math.random()-0.5)*0.2,
+    r: Math.random()*3 + 0.6,
+    hue: Math.random()*40 + 320,
+    a: Math.random()*0.3 + 0.06
+  });
+}
+function drawParts(){
+  ctx.clearRect(0,0,W,H);
+  for (const p of parts){
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < -20) p.x = W + 20;
+    if (p.x > W + 20) p.x = -20;
+    if (p.y < -20) p.y = H + 20;
+    if (p.y > H + 20) p.y = -20;
+    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*8);
+    g.addColorStop(0, `hsla(${p.hue},90%,60%,${p.a})`);
+    g.addColorStop(1, `hsla(${p.hue},90%,60%,0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r*6,0,Math.PI*2);
+    ctx.fill();
+  }
+  requestAnimationFrame(drawParts);
+}
+drawParts();
+
+/* ---------- subtle audio-reactive pulsing (light) using WebAudio if available ---------- */
+let audioCtx, analyser, dataArr;
+function initVisualizer(){
+  if (audioCtx) return;
+  try{
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(audio);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 128;
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    dataArr = new Uint8Array(analyser.frequencyBinCount);
+    visualLoop();
+  }catch(e){}
+}
+function visualLoop(){
+  if (!analyser) return;
+  analyser.getByteFrequencyData(dataArr);
+  let sum=0;
+  for (let i=0;i<dataArr.length;i++) sum += dataArr[i];
+  const avg = sum / dataArr.length; // 0..255
+  // subtle scale + brightness increase on images and bloom intensity
+  const s = 1 + (avg/255) * 0.04;
+  grid.style.transform = `rotate(${currentAngle}deg) scale(${s})`;
+  // gentle glow via CSS filter on images
+  document.querySelectorAll('.cell img').forEach(img => {
+    const adj = 0.96 + (avg/255)*0.12;
+    img.style.filter = `brightness(${adj}) saturate(${1 + (avg/255)*0.08})`;
+  });
+  requestAnimationFrame(visualLoop);
+}
+
+/* ---------- preserve behavior after page reload: if audio was playing, don't auto-play (respect browser) ---------- */
+/* no auto-play attempts except on user gesture (playBtn/pauseBtn) */
+
+/* ---------- final safety: ensure no stray text added by script ---------- */
+/* script intentionally avoids injecting any textual content beyond toggles and transformations */
+
+</script>
+</body>
+</html>
+```0
