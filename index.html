@@ -1,596 +1,306 @@
 <!doctype html>
-<html lang="fa">
+
+<html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>هدیهٔ ویژه</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>تقدیم به تو — سورپرایز</title>
+  <style>
+    :root{
+      --bg1:#0f172a;
+      --bg2:#071024;
+      --accent:#ff6b6b;
+      --glass: rgba(255,255,255,0.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(255,107,107,0.07), transparent),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    }
+    .stage{width:100%;max-width:980px;min-height:560px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:20px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,0.6);position:relative;overflow:hidden}/* Landing overlay */
+.landing{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg, rgba(7,16,36,0.9), rgba(9,12,26,0.6));backdrop-filter: blur(6px);transition:all .7s ease;z-index:30}
+.landing.hidden{opacity:0;transform:translateY(-12px);pointer-events:none}
+.landing h1{font-size:34px;margin:0 0 14px 0;text-align:center}
+.landing p{opacity:0.85;margin:0 0 22px 0}
+.cta{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(90deg,var(--accent),#ffd166);color:#071024;padding:10px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,107,107,0.12)}
+.subtext{font-size:13px;margin-top:10px;opacity:0.9}
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+/* Main area */
+.controls{display:flex;gap:12px;align-items:center;position:absolute;left:24px;top:24px;z-index:20}
+.btn{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent),#ff9a9a);color:#071024;font-weight:700}
+.btn:active{transform:translateY(1px)}
 
-<style>
-  :root{
-    --bg-1: #030312;
-    --bg-2: #071427;
-    --glass: rgba(255,255,255,0.03);
-    --accent-a: #ff6b9a;
-    --accent-b: #ffd7ea;
-    --size: min(860px, 96vw);
-    --gap: 10px;
-    --tile-radius: 14px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;padding:0;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial;direction:rtl}
-  body{display:flex;align-items:center;justify-content:center;padding:28px;color:#fff}
+.grid-area{height:100%;display:flex;align-items:center;justify-content:center;}
+.puzzle{width:min(560px,86%);aspect-ratio:1/1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:inset 0 2px 12px rgba(0,0,0,0.6);position:relative}
+.tile{background-size:300% 300%;background-repeat:no-repeat;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;transition:transform .45s cubic-bezier(.2,.9,.2,1),filter .3s}
+.tile::after{content:"";position:absolute;inset:0;box-shadow:inset 0 2px 0 rgba(255,255,255,0.03), inset 0 -6px 18px rgba(0,0,0,0.5);border-radius:10px}
+.tile:hover{transform:translateY(-6px) scale(1.02);filter:brightness(1.03)}
 
-  /* container */
-  .wrap{
-    width:var(--size);
-    max-width:1000px;
-    border-radius:20px;
-    position:relative;
-    padding:22px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
-    box-shadow: 0 30px 90px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    overflow:visible;
-  }
+.assembled{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.assembled .frame{width:320px;height:320px;border-radius:14px;overflow:hidden;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));transform-origin:center;transition:transform .6s cubic-bezier(.2,.9,.2,1)}
+.rotating{animation:spin 6s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-  /* flashy header (only the exact phrase is allowed here) */
-  .header{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin-bottom:14px;
-  }
-  .title{
-    font-family:"Playfair Display", serif;
-    font-weight:700;
-    font-size:22px;
-    letter-spacing:0.4px;
-    color: linear-gradient(90deg,#fff,#ffd7ea);
-    text-shadow:
-      0 6px 30px rgba(0,0,0,0.6),
-      0 1px 0 rgba(255,255,255,0.02);
-    padding:6px 18px;
-    border-radius:999px;
-    backdrop-filter: blur(6px) saturate(1.05);
-  }
-  /* the title text must be exactly this (no extra words) */
-  .title span{ display:inline-block; transform:translateY(-1px); }
+/* top-right info panel */
+.info{position:absolute;top:24px;right:24px;text-align:right;z-index:20}
+.info h3{margin:0 0 6px 0}
+.small{font-size:13px;color:rgba(255,255,255,0.85)}
 
-  /* cinematic stage */
-  .stage{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:20px;
-    flex-direction:column;
-  }
+/* modal */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:60;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal.open{opacity:1;pointer-events:auto}
+.sheet{background:linear-gradient(180deg,#071024,#0b1320);padding:22px;border-radius:14px;max-width:760px;width:92%;max-height:80vh;overflow:auto}
+.sheet h2{margin-top:0}
+.texts{display:flex;flex-direction:column;gap:8px}
+.text-item{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
 
-  /* grid wrapper will become circular and contain rotating content */
-  .grid-wrap{
-    width:calc(var(--size) - 160px);
-    max-width:720px;
-    aspect-ratio:1/1;
-    border-radius:18px;
-    transition: all .7s cubic-bezier(.2,.9,.3,1);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-  }
+/* file input */
+.upload{position:absolute;left:24px;bottom:24px;z-index:20}
+input[type=file]{display:none}
 
-  /* when diskMode enabled, grid-wrap becomes perfect circle and hides overflow */
-  .grid-wrap.disk{
-    border-radius:9999px;
-    overflow:hidden;
-    box-shadow: 0 40px 110px rgba(0,0,0,0.6), inset 0 -6px 40px rgba(255,120,170,0.02);
-    transform:translateZ(0);
-  }
+/* responsive */
+@media (max-width:720px){.puzzle{width:86%;gap:6px}.assembled .frame{width:260px;height:260px}}
 
-  /* the grid itself */
-  .grid{
-    width:95%;
-    height:95%;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    grid-template-rows:repeat(3,1fr);
-    gap:var(--gap);
-    border-radius:12px;
-    transform-origin:center center;
-    transition: transform .35s ease;
-    direction:ltr; /* ensure LTR visual control */
-  }
-
-  .cell{
-    border-radius:var(--tile-radius);
-    overflow:hidden;
-    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.28));
-    border:1px solid rgba(255,255,255,0.03);
-    position:relative;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02);
-  }
-
-  .cell img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-    opacity:0;
-    transform: translateY(22px) scale(1.06);
-    transition: transform .8s cubic-bezier(.2,.9,.3,1), opacity .6s ease, filter .6s;
-    filter: saturate(.98) contrast(.98) brightness(.98);
-    will-change:transform,opacity,filter;
-  }
-
-  .cell img.visible{
-    opacity:1;
-    transform:none;
-    filter: saturate(1.06) contrast(1.04) brightness(1.02);
-  }
-
-  /* glow rings layered above grid when spinning */
-  .ring-layer{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    display:block;
-    z-index:6;
-    mix-blend-mode:screen;
-    opacity:0.95;
-  }
-
-  /* control bar (only emoji buttons + small icons, no extra text) */
-  .controls{
-    margin-top:16px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    justify-content:center;
-  }
-  .control-btn{
-    width:64px;
-    height:64px;
-    border-radius:999px;
-    border:0;
-    background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    cursor:pointer;
-    box-shadow: 0 18px 50px rgba(255,107,154,0.12);
-    transition: transform .18s ease;
-  }
-  .control-btn:active{ transform: scale(.96) }
-
-  /* small code toggle button (emoji) */
-  .code-toggle{
-    width:56px; height:56px; border-radius:12px;
-    background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04);
-    display:inline-flex;align-items:center;justify-content:center;font-size:20px; cursor:pointer;
-  }
-
-  /* code area - must contain only the exact lines user provided + final sentence (no extra labels) */
-  .code-area{
-    margin-top:14px;
-    border-radius:12px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(4,4,8,0.15));
-    padding:12px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
-    font-size:13px;
-    color:#ffdfe9;
-    line-height:1.6;
-    white-space:pre-wrap;
-    display:none;
-    border:1px solid rgba(255,255,255,0.03);
-  }
-
-  /* subtle footer - only decorative emoji allowed (we'll avoid text) */
-  .footer{
-    margin-top:12px;
-    text-align:center;
-    color:rgba(255,255,255,0.08);
-    font-size:12px;
-  }
-
-  /* cinematic depth: blur background shapes */
-  .bg-shape{
-    position:absolute;
-    width:420px;
-    height:420px;
-    border-radius:50%;
-    filter: blur(80px);
-    opacity:0.25;
-    z-index:1;
-    pointer-events:none;
-  }
-  .bg-shape.a{ background: radial-gradient(circle at 30% 30%, rgba(255,120,170,0.15), transparent 20%); left:-120px; top:-120px;}
-  .bg-shape.b{ background: radial-gradient(circle at 70% 70%, rgba(110,190,255,0.09), transparent 18%); right:-140px; bottom:-140px;}
-
-  /* responsiveness */
-  @media (max-width:820px){
-    .wrap{padding:16px}
-    .control-btn{width:56px;height:56px;font-size:20px}
-  }
-  @media (max-width:480px){
-    .grid-wrap{width:88vw;height:88vw}
-    .grid{width:86vw;height:86vw}
-  }
-</style>
+  </style>
 </head>
 <body>
-  <div class="wrap" role="main" aria-label="هدیه">
-    <div class="header">
-      <div class="title"><span>روزت مبارک قشنگترین دختر زندگی من🥹♥️</span></div>
-    </div>
+  <div class="stage" id="stage"><div class="landing" id="landing">
+  <h1>تقدیم به تو که...</h1>
+  <p>روی متن ضربه بزن تا سورپرایز شروع شود.</p>
+  <div class="cta" id="startBtn">تقدیم به تو که...</div>
+  <div class="subtext">(این صفحه قابل شخصی‌سازی است — عکس خودت را آپلود کن)</div>
+</div>
 
-    <div class="stage">
-      <div class="bg-shape a"></div>
-      <div class="bg-shape b"></div>
+<div class="controls">
+  <div class="btn" id="textsBtn">متن‌ها</div>
+  <div class="btn primary" id="playBtn">► پخش / توقف</div>
+  <label class="btn" for="fileInp">آپلود عکس</label>
+  <div class="upload"><input id="fileInp" type="file" accept="image/*"/></div>
+</div>
 
-      <div class="grid-wrap" id="gridWrap">
-        <div class="grid" id="grid">
-          <!-- initial DOM order 1..9 (we will mirror left-right by JS, preserving center column) -->
-          <div class="cell" data-id="1"><img src="img1.jpg" alt=""></div>
-          <div class="cell" data-id="2"><img src="img2.jpg" alt=""></div>
-          <div class="cell" data-id="3"><img src="img3.jpg" alt=""></div>
+<div class="info">
+  <h3 id="title">وقتی عکست کامل شد، دکمهٔ پخش رو بزن</h3>
+  <div class="small">می‌تونی عکس رو آپلود کنی یا آدرس عکس رو در کد تغییر بدی</div>
+</div>
 
-          <div class="cell" data-id="4"><img src="img4.jpg" alt=""></div>
-          <div class="cell" data-id="5"><img src="img5.jpg" alt=""></div>
-          <div class="cell" data-id="6"><img src="img6.jpg" alt=""></div>
-
-          <div class="cell" data-id="7"><img src="img7.jpg" alt=""></div>
-          <div class="cell" data-id="8"><img src="img8.jpg" alt=""></div>
-          <div class="cell" data-id="9"><img src="img9.jpg" alt=""></div>
-        </div>
-
-        <!-- layered bloom / rings canvas -->
-        <svg class="ring-layer" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <radialGradient id="rg1" cx="30%" cy="20%" r="60%">
-              <stop offset="0%" stop-color="#ffd7ea" stop-opacity="0.24"/>
-              <stop offset="40%" stop-color="#ffd7ea" stop-opacity="0.06"/>
-              <stop offset="100%" stop-color="#ffd7ea" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="rg2" cx="70%" cy="80%" r="50%">
-              <stop offset="0%" stop-color="#9ed1ff" stop-opacity="0.14"/>
-              <stop offset="50%" stop-color="#9ed1ff" stop-opacity="0.02"/>
-              <stop offset="100%" stop-color="#9ed1ff" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <rect x="0" y="0" width="100" height="100" fill="url(#rg1)"></rect>
-          <rect x="0" y="0" width="100" height="100" fill="url(#rg2)"></rect>
-        </svg>
-      </div>
-
-      <div class="controls" role="toolbar" aria-label="کنترل‌ها">
-        <button id="playBtn" class="control-btn" title="play">▶️</button>
-        <button id="pauseBtn" class="control-btn" title="pause">⏸️</button>
-        <button id="codeBtn" class="code-toggle" title="codes">🔐</button>
-      </div>
-
-      <div id="codeArea" class="code-area" aria-hidden="true">
-11011000 10101010
-11011001 10001000
-11011001 10000101
-11011000 10101011
-11011001 10000100
-11011001 10010000
-11011001 10000110
-11011001 10001000
-11011000 10110001
-11011001 10000111
-11011000 10110011
-11011000 10101010
-11011011 10001100
-1
-7777
-44
-444
-66
-33
-666
-66
-1
-22
-777
-2
-888
-33
-44
-33
-2
-777
-8
-11011000 10101010
-11011001 10001000
-11011001 10000101
-11011000 10101011
-11011001 10000100
-11011001 10010000
-11011001 10000110
-11011001 10001000
-11011000 10110001
-11011001 10000111
-11011000 10110011
-11011000 10101010
-11011011 10001100
-1
-7777
-44
-444
-66
-33
-666
-66
-1
-22
-777
-2
-888
-33
-44
-33
-2
-777
-8
-
-تو مثل نور هستی، shine on, brave heart.
-      </div>
-
-    </div>
+<div class="grid-area">
+  <div class="puzzle" id="puzzle">
+    <!-- 9 tiles -->
+    <!-- data-pos: row-col index for background positioning -->
+    <div class="tile" data-row="0" data-col="0" data-index="1"></div>
+    <div class="tile" data-row="0" data-col="1" data-index="2"></div>
+    <div class="tile" data-row="0" data-col="2" data-index="3"></div>
+    <div class="tile" data-row="1" data-col="0" data-index="4"></div>
+    <div class="tile" data-row="1" data-col="1" data-index="5"></div>
+    <div class="tile" data-row="1" data-col="2" data-index="6"></div>
+    <div class="tile" data-row="2" data-col="0" data-index="7"></div>
+    <div class="tile" data-row="2" data-col="1" data-index="8"></div>
+    <div class="tile" data-row="2" data-col="2" data-index="9"></div>
   </div>
 
-  <!-- hidden audio element -->
-  <audio id="audio" preload="auto" crossorigin="anonymous">
-    <source src="music.mp3" type="audio/mpeg">
-  </audio>
+  <!-- assembled hidden version to rotate the full image -->
+  <div class="assembled" id="assembled" aria-hidden="true" style="display:none;">
+    <div class="frame" id="frame"></div>
+  </div>
 
-<script>
-/*
-  Behavior summary (implements exactly what requested):
-  - mirror left/right columns while keeping center column in place
-  - super-cinematic visuals: particles, bloom, parallax
-  - two emoji controls (play/pause) + code toggle (🔐) - no extra text
-  - when play: images reveal, grid-wrap becomes circular and spins; only images rotate
-  - when pause: audio pauses but keeps currentTime; rotation pauses but preserves angle (no jump back)
-  - resume continues from same time & rotation angle
-  - code area contains ONLY the exact lines provided (no extra labels)
-*/
+</div>
 
-/* -------- helpers & initial setup -------- */
-const grid = document.getElementById('grid');
-const gridWrap = document.getElementById('gridWrap');
-const cells = Array.from(grid.children);
-const playBtn = document.getElementById('playBtn');
-const pauseBtn = document.getElementById('pauseBtn');
-const codeBtn = document.getElementById('codeBtn');
-const codeArea = document.getElementById('codeArea');
-const audio = document.getElementById('audio');
+<!-- hidden audio (replace src with your chosen mp3 hosted in repo) -->
+<audio id="music" src="" preload="auto"></audio>
 
-let animating = false;
-let revealed = false;
+<!-- modal for texts -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h2>جملات «تقدیم به تو که...»</h2>
+    <div class="texts" id="textsContainer"></div>
+    <div style="margin-top:12px;text-align:left"><button class="btn" id="closeModal">بستن</button></div>
+  </div>
+</div>
 
-/* ---------- mirror left/right columns while preserving center ---------- */
-(function mirrorColumns(){
-  // current DOM order: 1,2,3 / 4,5,6 / 7,8,9 (cells[0]..cells[8])
-  // desired visual: swap left<->right while keeping center same: 3,2,1 / 6,5,4 / 9,8,7
-  const order = [2,1,0,5,4,3,8,7,6];
-  const frag = document.createDocumentFragment();
-  order.forEach(i => frag.appendChild(cells[i]));
-  grid.appendChild(frag);
-})();
+  </div>  <script>
+    // ====== CONFIG: replace these defaults if you want a shipped demo ======
+    const DEFAULT_IMAGE = '';
+    const DEFAULT_MUSIC = '';
+    // A ready-made list of sentences (from our conversation) — you can edit/expand
+    const SENTENCES = [
+      'از من در من فراوان‌تری.',
+      'دلیل گریه‌ی شب‌های منی.',
+      'بی‌آنکه بخواهی، آرامِ دلمی.',
+      'هر سکوتت هزار جمله ناگفته در من می‌نویسد.',
+      'با خنده‌ات جهان من زیباتر می‌شود.',
+      'نمی‌دانی، اما نفس‌هایم بوی تو را می‌دهد.',
+      'وقتی نیستی، انگار هیچ صدایی شنیدنی نیست.',
+      'در میان هزاران چهره، نگاه من فقط دنبال توست.',
+      'بی‌خبر از من، تمام شعرهایت را از تو نوشته‌ام.',
+      'تویی که با یک نگاهت، نظم جهان من به‌هم می‌ریزد.',
+      'آرامشی که حتی دعاهایم هم بلد نیستند توصیفش کنند.',
+      'هر شب که نمی‌خوابم، تو از میان خوابم رد می‌شوی.',
+      'بی‌دعای تو، روزهایم بوی ملال می‌گیرد.',
+      'کاش می‌دانستی چقدر در دلم حرف‌های نگفته داری.',
+      'در من صدایی هست که فقط با نام تو آرام می‌گیرد.',
+      'بودنِ ساده‌ات، عجیب‌ترین معجزه‌ی زندگی من است.',
+      'تو همان لبخندی هستی که از دل خستگی روی لبم می‌نشیند.',
+      'تمام مسیرهایم بی‌دلیل به سوی تو ختم می‌شوند.',
+      'حتی وقتی نیستی، نبودنت را زندگی می‌کنم.',
+      'تو را نه با چشم، با دل دیده‌ام.',
+      'تو همان اتفاق آرامی هستی که هر روز دلم می‌خواهد تکرار شود.',
+      'با هر تپش دلم، نامت تکرار می‌شود.',
+      'در من چیزی هست که فقط با تو زنده است.',
+      'تو را نمی‌نویسم، تو را زندگی می‌کنم.',
+      'در هر «بی‌کسی»، رد پای مهربانی تو پیداست.',
+      'سکوت من پر از فریاد نام توست.',
+      'هیچ رویایی از تو قشنگ‌تر نیست.',
+      'صدایت، لالاییِ ناآرام‌ترین شب‌های من است.',
+      'تو آغازِ شعرِ دلی هستی که بی‌پایان تو را می‌نویسد.',
+      'به تو که بی‌آنکه بدانی، معنای دوست‌داشتن شدی.',
+      'به تو که هر بار نگاهت، دل را به سفر می‌برد.',
+      'به تو که خستگی دنیا با بودنت بی‌معنا می‌شود.',
+      'به تو که حتی خیالِ بودنت، زندگی‌ست.',
+      'به تو که «من» در مقابلت کم می‌آورد.',
+      'به تو که دل از من بردی، بی‌آنکه نگاهی طلب کرده باشی.',
+      'به تو که حضورت را هیچ واژه‌ای جا نمی‌دهد.',
+      'به تو که ساده‌ای و همین سادگی، پیچیده‌ترین حس دنیاست.',
+      'به تو که هرچه بنویسم، باز کم است.',
+      'به تو که اگر بدانی، جهان دیگری خواهی شد برایم.',
+      'به تو که بی‌خبر از این همه حس قشنگی در منی...'
+    ];
 
-/* ---------- preload images and reveal helper ---------- */
-const imgs = Array.from(document.querySelectorAll('.cell img'));
-imgs.forEach(img=>{
-  if (img.complete) img.classList.add('visible');
-  else img.addEventListener('load', ()=> img.classList.add('visible'));
-});
+    // ====== UI Hookups ======
+    const landing = document.getElementById('landing');
+    const startBtn = document.getElementById('startBtn');
+    const puzzle = document.getElementById('puzzle');
+    const frame = document.getElementById('frame');
+    const assembled = document.getElementById('assembled');
+    const playBtn = document.getElementById('playBtn');
+    const music = document.getElementById('music');
+    const textsBtn = document.getElementById('textsBtn');
+    const modal = document.getElementById('modal');
+    const textsContainer = document.getElementById('textsContainer');
+    const closeModal = document.getElementById('closeModal');
+    const fileInp = document.getElementById('fileInp');
 
-function revealImagesStagger(){
-  if (revealed) return;
-  revealed = true;
-  const arr = Array.from(document.querySelectorAll('.cell img'));
-  arr.forEach((img, idx)=>{
-    setTimeout(()=> img.classList.add('visible'), idx * 90);
-  });
-}
+    // fill modal
+    SENTENCES.forEach(s=>{
+      const div = document.createElement('div');div.className='text-item';div.textContent=s;textsContainer.appendChild(div);
+    });
 
-/* ---------- spinning logic (preserve angle on pause/resume) ---------- */
-let currentAngle = 0; // degrees
-let lastTimestamp = null;
-let running = false;
-let spinSpeed = 24; // degrees per second (can be adjusted)
+    // default image & music (if provided)
+    let imgURL = DEFAULT_IMAGE;
+    let musicURL = DEFAULT_MUSIC;
+    if(musicURL){music.src = musicURL}
 
-function tick(ts){
-  if (!lastTimestamp) lastTimestamp = ts;
-  const dt = (ts - lastTimestamp) / 1000; // seconds
-  lastTimestamp = ts;
-  if (running){
-    currentAngle = (currentAngle + spinSpeed * dt) % 360;
-    grid.style.transform = `rotate(${currentAngle}deg)`;
-  }
-  // subtle slow floating transform for glassiness
-  requestAnimationFrame(tick);
-}
-requestAnimationFrame(tick);
-
-/* start spin: convert wrap to disk and start animation loop */
-function startVisualSpin(){
-  gridWrap.classList.add('disk');
-  // visually only rotate grid (cells inside). We already use transform on grid.
-  running = true;
-}
-
-/* stop spin: pause but preserve currentAngle */
-function pauseVisualSpin(){
-  running = false;
-}
-
-/* ---------- audio control: play / pause preserving time ---------- */
-async function tryPlayAudio(){
-  try{
-    // resume audio context if needed (for some browsers)
-    if (typeof AudioContext !== 'undefined' && window.audioCtx && window.audioCtx.state === 'suspended'){
-      window.audioCtx.resume().catch(()=>{});
+    // helper to apply background positions
+    function applyImageToTiles(url){
+      imgURL = url || imgURL;
+      const tiles = puzzle.querySelectorAll('.tile');
+      tiles.forEach(t=>{
+        const r = parseInt(t.dataset.row,10);
+        const c = parseInt(t.dataset.col,10);
+        t.style.backgroundImage = `url(${imgURL})`;
+        // Because background-size is 300% for a 3x3 grid, positions are 0%,50%,100%
+        t.style.backgroundPosition = `${c*50}% ${r*50}%`;
+      });
+      // assembled full-frame
+      buildAssembledFrame(imgURL);
     }
-    await audio.play();
-    return true;
-  }catch(e){
-    // blocked by browser autoplay policies - fallback: show native controls for manual start
-    audio.controls = true;
-    audio.style.display = 'block';
-    return false;
-  }
-}
 
-/* resume from pause: keep audio.currentTime */
-async function handlePlay(){
-  revealImagesStagger();
-  const ok = await tryPlayAudio();
-  startVisualSpin();
-  // optionally init audio visualizer if available
-  if (ok) initVisualizer();
-}
+    function buildAssembledFrame(url){
+      frame.innerHTML='';
+      // create 9 small divs to show whole image as one element but keep structure for rotation
+      for(let r=0;r<3;r++){
+        for(let c=0;c<3;c++){
+          const d = document.createElement('div');
+          d.style.backgroundImage = `url(${url})`;
+          d.style.backgroundSize = '300% 300%';
+          d.style.backgroundPosition = `${c*50}% ${r*50}%`;
+          d.style.borderRadius='8px';
+          d.style.boxShadow='inset 0 2px 0 rgba(255,255,255,0.02)';
+          frame.appendChild(d);
+        }
+      }
+    }
 
-/* pause: stop audio but do not reset currentTime */
-function handlePause(){
-  audio.pause();
-  pauseVisualSpin();
-}
+    // start button
+    startBtn.addEventListener('click', ()=>{
+      landing.classList.add('hidden');
+      setTimeout(()=>{landing.style.display='none';},700);
+      // show assembled preview and tiles
+      assembled.style.display='flex';
+      assembled.style.pointerEvents='none';
+    });
 
-/* ---------- code toggle (only show/hide exact supplied lines) ---------- */
-codeBtn.addEventListener('click', ()=>{
-  if (codeArea.style.display === 'block'){
-    codeArea.style.display = 'none';
-    codeArea.setAttribute('aria-hidden','true');
-  } else {
-    codeArea.style.display = 'block';
-    codeArea.setAttribute('aria-hidden','false');
-  }
-});
+    // play button toggles music + rotation
+    let playing=false;
+    playBtn.addEventListener('click', async ()=>{
+      // if no image, flash instruction
+      if(!imgURL){
+        alert('لطفاً ابتدا عکس را آپلود کنید یا آدرس تصویر را در کد قرار دهید.');
+        return;
+      }
+      if(!music.src){
+        // try to play without music: only rotate the frame
+        toggleRotation();
+        return;
+      }
+      if(!playing){
+        try{
+          await music.play();
+          toggleRotation(true);
+          playing=true;
+          playBtn.textContent='■ توقف';
+        }catch(e){
+          // autoplay might be blocked — fall back to just start rotation
+          toggleRotation(true);
+          playing=true;playBtn.textContent='■ توقف';
+        }
+      }else{
+        music.pause();music.currentTime=0;
+        toggleRotation(false);
+        playing=false;playBtn.textContent='► پخش / توقف';
+      }
+    });
 
-/* connect play/pause UI */
-playBtn.addEventListener('click', ()=> {
-  // if audio is paused or ended, attempt play/resume
-  if (audio.paused || audio.ended){
-    handlePlay();
-  } else {
-    // if already playing, do nothing (user expected pause button)
-    // but optionally restart if desired - we keep semantics simple
-    // nothing
-  }
-});
-pauseBtn.addEventListener('click', ()=> {
-  if (!audio.paused){
-    handlePause();
-  } else {
-    // if paused, resume from same time
-    handlePlay();
-  }
-});
+    function toggleRotation(on){
+      if(on){
+        frame.classList.add('rotating');
+      }else{
+        frame.classList.remove('rotating');
+      }
+    }
 
-/* ensure resume continues spinning when audio resumes via native controls */
-audio.addEventListener('play', ()=> {
-  startVisualSpin();
-});
-audio.addEventListener('pause', ()=> {
-  pauseVisualSpin();
-});
-audio.addEventListener('ended', ()=> {
-  pauseVisualSpin();
-  // keep disk shape (gridWrap.disk) and final angle preserved
-});
+    // texts modal
+    textsBtn.addEventListener('click', ()=>{modal.classList.add('open')});
+    closeModal.addEventListener('click', ()=>{modal.classList.remove('open')});
+    modal.addEventListener('click',(e)=>{if(e.target===modal)modal.classList.remove('open')});
 
-/* ---------- small cinematic extras: particle canvas (soft) ---------- */
-const canvas = document.createElement('canvas');
-canvas.style.position = 'absolute';
-canvas.style.inset = '0';
-canvas.style.pointerEvents = 'none';
-canvas.style.zIndex = 3;
-gridWrap.appendChild(canvas);
-const ctx = canvas.getContext('2d');
-let W = canvas.width = canvas.clientWidth || canvas.offsetWidth;
-let H = canvas.height = canvas.clientHeight || canvas.offsetHeight;
-window.addEventListener('resize', ()=> {
-  W = canvas.width = canvas.clientWidth;
-  H = canvas.height = canvas.clientHeight;
-});
+    // file input -> read image
+    fileInp.addEventListener('change', ev=>{
+      const f = ev.target.files && ev.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        applyImageToTiles(e.target.result);
+      }
+      reader.readAsDataURL(f);
+    });
 
-const parts = [];
-for (let i=0;i<36;i++){
-  parts.push({
-    x: Math.random()*W,
-    y: Math.random()*H,
-    vx: (Math.random()-0.5)*0.2,
-    vy: (Math.random()-0.5)*0.2,
-    r: Math.random()*3 + 0.6,
-    hue: Math.random()*40 + 320,
-    a: Math.random()*0.3 + 0.06
-  });
-}
-function drawParts(){
-  ctx.clearRect(0,0,W,H);
-  for (const p of parts){
-    p.x += p.vx;
-    p.y += p.vy;
-    if (p.x < -20) p.x = W + 20;
-    if (p.x > W + 20) p.x = -20;
-    if (p.y < -20) p.y = H + 20;
-    if (p.y > H + 20) p.y = -20;
-    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*8);
-    g.addColorStop(0, `hsla(${p.hue},90%,60%,${p.a})`);
-    g.addColorStop(1, `hsla(${p.hue},90%,60%,0)`);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r*6,0,Math.PI*2);
-    ctx.fill();
-  }
-  requestAnimationFrame(drawParts);
-}
-drawParts();
+    // init with placeholder if provided
+    if(DEFAULT_IMAGE) applyImageToTiles(DEFAULT_IMAGE);
 
-/* ---------- subtle audio-reactive pulsing (light) using WebAudio if available ---------- */
-let audioCtx, analyser, dataArr;
-function initVisualizer(){
-  if (audioCtx) return;
-  try{
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioCtx.createMediaElementSource(audio);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 128;
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    dataArr = new Uint8Array(analyser.frequencyBinCount);
-    visualLoop();
-  }catch(e){}
-}
-function visualLoop(){
-  if (!analyser) return;
-  analyser.getByteFrequencyData(dataArr);
-  let sum=0;
-  for (let i=0;i<dataArr.length;i++) sum += dataArr[i];
-  const avg = sum / dataArr.length; // 0..255
-  // subtle scale + brightness increase on images and bloom intensity
-  const s = 1 + (avg/255) * 0.04;
-  grid.style.transform = `rotate(${currentAngle}deg) scale(${s})`;
-  // gentle glow via CSS filter on images
-  document.querySelectorAll('.cell img').forEach(img => {
-    const adj = 0.96 + (avg/255)*0.12;
-    img.style.filter = `brightness(${adj}) saturate(${1 + (avg/255)*0.08})`;
-  });
-  requestAnimationFrame(visualLoop);
-}
+    // small UX: clicking any tile will open assembled large view momentarily
+    puzzle.addEventListener('click', ()=>{
+      assembled.style.display='flex';
+      assembled.style.opacity=1;
+      setTimeout(()=>assembled.style.opacity=1,10);
+    });
 
-/* ---------- preserve behavior after page reload: if audio was playing, don't auto-play (respect browser) ---------- */
-/* no auto-play attempts except on user gesture (playBtn/pauseBtn) */
+    // keyboard: space toggles play
+    window.addEventListener('keydown',(e)=>{if(e.code==='Space'){e.preventDefault();playBtn.click()}});
 
-/* ---------- final safety: ensure no stray text added by script ---------- */
-/* script intentionally avoids injecting any textual content beyond toggles and transformations */
-
-</script>
-</body>
+    // End of script
+  </script></body>
 </html>
-```0
